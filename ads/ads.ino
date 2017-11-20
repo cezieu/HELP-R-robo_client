@@ -4,8 +4,12 @@
 #include "Adafruit_SI1145.h"
 #include <Adafruit_BMP280.h>
 #include<math.h>
+#include <DHT.h>
+#include <DHT_U.h>
 //The number of points marked on the curves in data sheets
 #define POINTS 9
+#define DHTPIN            2  //pinulconectat la senzor
+#define DHTTYPE           DHT22
 float Ro = 98800, Vref = 5.0, R1 = 7700;
 // Change the following values for different gasses from the corresponding curves from datasheet
 //The following valure are corresponding X and Y coordinate values for the marked points on curves
@@ -16,7 +20,9 @@ float lty[POINTS] = {1.67, 1.11, 0.88, 0.78, 0.64, 0.56, 0.46, 0.36, 0.26};
 int counter1, counter2;
 int temp;
 int rawAnalogValue[100]; 
+DHT_Unified dht(DHTPIN, DHTTYPE);
 
+uint32_t delayMS;
 
 #define MPU9250_ADDRESS 0x68
 #define MAG_ADDRESS 0x0C
@@ -75,6 +81,7 @@ unsigned long previousMillis=0;
 unsigned long previousMillis2=0;
 void setup(void) 
 {
+ 
   Wire.begin();
 Serial.begin(115200);
   Serial.println("Hello!");
@@ -93,7 +100,9 @@ I2CwriteByte(MPU9250_ADDRESS,0x37,0x02);
  
 // Request continuous magnetometer measurements in 16 bits
 I2CwriteByte(MAG_ADDRESS,0x0A,0x16);
- 
+  sensor_t sensor;
+  dht.temperature().getSensor(&sensor);
+    dht.humidity().getSensor(&sensor);
 pinMode(13, OUTPUT);
 Timer1.initialize(10000); // initialize timer1, and set a 1/2 second period
 Timer1.attachInterrupt(callback); // attaches callback() as a timer overflow interrupt
@@ -144,6 +153,27 @@ void loop(void )
     
     Serial.println();
      previousMillis2 = currentMillis;
+     //DHT22
+       sensors_event_t event;  
+  dht.temperature().getEvent(&event);
+  if (isnan(event.temperature)) {
+    Serial.println("Error reading temperature!");
+  }
+  else {
+    Serial.print("Temperature: ");
+    Serial.print(event.temperature);
+    Serial.println(" *C");
+  }
+  // Get humidity event and print its value.
+  dht.humidity().getEvent(&event);
+  if (isnan(event.relative_humidity)) {
+    Serial.println("Error reading humidity!");
+  }
+  else {
+    Serial.print("Humidity: ");
+    Serial.print(event.relative_humidity);
+    Serial.println("%");
+  }
     }
     int16_t adc0,adc1;
   if (currentMillis - previousMillis >= 1000) {
