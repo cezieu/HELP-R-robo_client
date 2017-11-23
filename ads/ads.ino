@@ -137,7 +137,7 @@ digitalWrite(13, digitalRead(13) ^ 1);
 void loop(void ) 
 {
   unsigned long currentMillis=millis();
-  
+  //BMP?
   if(currentMillis - previousMillis2 >=2000){
      Serial.print(F("Temperature = "));
     Serial.print(bmp.readTemperature());
