@@ -249,7 +249,7 @@ void loop(void ) {
       digitalWrite(13, LOW);
     }
     case 244: {
-      digitalWrite(12, LOW);
+      digitalWrite(12, HIGH);
     }
     case 243: {
   voMeasured = ads.readADC_SingleEnded(0)*0.1875; // read the dust value
