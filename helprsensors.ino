@@ -87,6 +87,7 @@ void setup(void)
 Serial.begin(115200);
   pinMode(13,OUTPUT);
   pinMode(12,OUTPUT);
+  pinMode(2,INPUT);
   // Set accelerometers low pass filter at 5Hz
 I2CwriteByte(MPU9250_ADDRESS,29,0x06);
 // Set gyroscope low pass filter at 5Hz
@@ -243,13 +244,16 @@ void loop(void ) {
     case 246: {
       //light on
       digitalWrite(13, HIGH);
+      break;
     }
     case 245: {
       //light off
       digitalWrite(13, LOW);
+      break;
     }
     case 244: {
       digitalWrite(12, HIGH);
+      break;
     }
     case 243: {
   voMeasured = ads.readADC_SingleEnded(0)*0.1875; // read the dust value
@@ -258,6 +262,11 @@ void loop(void ) {
   //Serial.print(voMeasured);
   //Serial.print(calcVoltage);
   Serial.write((byte)(dustDensity*100));
+  break;
+    }
+    case 242: {
+      Serial.write((byte)(digitalRead(2)));
+      break;
     }
     }
 
