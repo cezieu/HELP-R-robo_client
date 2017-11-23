@@ -46,7 +46,6 @@ Adafruit_ADS1015 ads;     /* Use thi for the 12-bit version */
 Adafruit_SI1145 uv = Adafruit_SI1145();
 Adafruit_BMP280 bmp; 
 
-int16_t adc0,adc1,adc2;
 Servo S0,S1,S2,S3,S4;
 void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data)
 {
@@ -106,8 +105,6 @@ I2CwriteByte(MAG_ADDRESS,0x0A,0x16);
   sensor_t sensor;
   dht.temperature().getSensor(&sensor);
     dht.humidity().getSensor(&sensor);
-  Serial.println("Getting single-ended readings from AIN0..3");
-  Serial.println("ADC Range: +/- 6.144V (1 bit = 3mV/ADS1015, 0.1875mV/ADS1115)");
   
   // The ADC input range (or gain) can be changed via the following
   // functions, but be careful never to exceed VDD +0.3V max, or to
@@ -137,14 +134,11 @@ void loop(void ) {
   {
     case 255:
     {
-       Serial.println("Reading Voltage");
-      //tensiunea bateriei , 0.375v/bit
       Serial.write((byte)(ads.readADC_SingleEnded(2)*0.375*0.000032941));
       break;
     }
     case 254: {
       //DHT22 0.5grade /bit
-       Serial.println("Reading DHT22");
       sensors_event_t event;
       Serial.write((byte)(event.temperature*2));
       Serial.write((byte)(event.relative_humidity*2));
@@ -152,7 +146,6 @@ void loop(void ) {
     }
     case 253: {
       //Servouri
-      Serial.println("Writing servo data");
       S0.write(Serial.read());
       S1.write(Serial.read());
       S2.write(Serial.read());
@@ -162,7 +155,6 @@ void loop(void ) {
     }
     case 252: {
       //BMP280
-       Serial.println("Reading BMP280");
     Serial.write((byte)(bmp.readTemperature()*2));
     int pressure=(int)(bmp.readPressure());
     Serial.write((byte)(pressure&0xFF));
@@ -174,7 +166,6 @@ void loop(void ) {
     }
     case 251: {
       //SI1145
-       Serial.println("Reading SI1145");
   Serial.write((byte)(uv.readVisible()/2));
   Serial.write((byte)(uv.readIR()/2));
   float UVindex = uv.readUV();
@@ -185,7 +176,6 @@ void loop(void ) {
       case 250: {
   //MQ2
  //Serial.write((byte)(ads.readADC_SingleEnded(1)));
-  Serial.println("Reading MQ2");
   Serial.write((byte)(digitalRead(4)?255:0));
     }
     case 249: {
@@ -260,6 +250,14 @@ void loop(void ) {
     }
     case 244: {
       digitalWrite(12, LOW);
+    }
+    case 243: {
+  voMeasured = ads.readADC_SingleEnded(0)*0.1875; // read the dust value
+  calcVoltage = voMeasured;
+  dustDensity = 0.17 * calcVoltage;
+  //Serial.print(voMeasured);
+  //Serial.print(calcVoltage);
+  Serial.write((byte)(dustDensity*100));
     }
     }
 
